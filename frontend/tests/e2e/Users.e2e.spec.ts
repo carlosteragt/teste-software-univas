@@ -23,6 +23,7 @@ test.describe('Usuários', () => {
     test('exclui usuário criado e não aparece mais na lista', async ({ page }) => {
         await page.goto('/users')
 
+        // cria um usuário temporário para excluir
         await page.getByRole('button', { name: /Adicionar Usuário/i }).click()
         const emailToDelete = `del.${Date.now()}@ex.com`
         await page.getByLabel('Nome:').fill('Excluir E2E')
@@ -30,11 +31,14 @@ test.describe('Usuários', () => {
         await page.getByRole('button', { name: /Criar/i }).click()
         await expect(page.getByText(emailToDelete)).toBeVisible()
 
+        // intercepta e aceita o confirm de exclusão
         page.on('dialog', dialog => dialog.accept())
 
+        // clica excluir na linha do usuário criado
         const createdRow = page.locator('tr', { hasText: emailToDelete })
         await createdRow.getByRole('button', { name: /Excluir/i }).click()
 
+        // verifica que o usuário sumiu da lista
         await expect(page.getByText(emailToDelete)).not.toBeVisible()
     })
 
